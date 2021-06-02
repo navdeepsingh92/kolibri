@@ -2,6 +2,17 @@
 
   <Navbar>
     <NavbarLink
+      name="homepage-link"
+      :title="coreString('homeLabel')"
+      :link="allClassesLink"
+    >
+      <KIcon
+        icon="dashboard"
+        style="top: 0; width: 24px; height: 24px;"
+        :color="$themeTokens.textInverted"
+      />
+    </NavbarLink>
+    <NavbarLink
       v-if="showClassesLink"
       name="classes-link"
       :title="coreString('classesLabel')"

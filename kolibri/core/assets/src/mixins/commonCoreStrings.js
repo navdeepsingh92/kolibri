@@ -58,6 +58,7 @@ export const coreStrings = createTranslator('CommonCoreStrings', {
   facilityDuplicated: 'There is already a facility with this name on this device',
   fullNameLabel: 'Full name',
   genderLabel: 'Gender',
+  homeLabel: 'Home',
   identifierLabel: 'Identifier',
   inProgressLabel: 'In progress',
   kolibriLabel: 'Kolibri',
