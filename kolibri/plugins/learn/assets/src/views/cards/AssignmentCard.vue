@@ -13,11 +13,13 @@
       <div class="progress" :class="themeClasses.progress">
         <KLabeledIcon
           v-if="inProgressLabel"
+          :color="$themeTokens.progress"
           icon="inProgress"
           :label="inProgressLabel"
         />
         <KLabeledIcon
           v-else-if="completedLabel"
+          :color="$themeTokens.mastered"
           icon="mastered"
           :label="completedLabel"
         />

@@ -1,8 +1,13 @@
 <template>
 
   <div class="activity-label">
-    <!-- TODO Replace content kind icon with an activity icon -->
-    <KLabeledIcon :iconAfter="item.kind" :label="defaultLabelForResource(item)" />
+    <KLabeledIcon
+      v-if="item.thumbnail"
+      v-bind="iconProps"
+    />
+    <span v-else>
+      {{ defaultLabelForResource(item) }}
+    </span>
   </div>
 
 </template>
@@ -15,8 +20,9 @@
   export default {
     name: 'ActivityLabel',
     setup() {
-      const { defaultLabelForResource } = useLearningActivities();
+      const { defaultLabelForResource, defaultIconForResource } = useLearningActivities();
       return {
+        defaultIconForResource,
         defaultLabelForResource,
       };
     },
@@ -24,6 +30,26 @@
       item: {
         type: Object,
         required: true,
+      },
+      color: {
+        type: String,
+        required: false,
+        default: null,
+      },
+      iconAfter: {
+        type: Boolean,
+        default: false,
+      },
+    },
+    computed: {
+      iconProps() {
+        const iconProp = this.iconAfter ? 'iconAfter' : 'icon';
+        // TODO Replace content kind icon with learning activity icon
+        return {
+          label: this.defaultLabelForResource(this.item),
+          [iconProp]: this.defaultIconForResource(this.item),
+          color: this.color || this.$themeTokens.text,
+        };
       },
     },
   };
@@ -35,7 +61,6 @@
 
   .activity-label {
     font-size: 12px;
-    text-align: right;
   }
 
 </style>

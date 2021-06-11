@@ -43,6 +43,7 @@
 
     display: inline-block;
     padding: 16px;
+    overflow: hidden;
     text-decoration: none;
     border-radius: 8px;
     transition: box-shadow $core-time ease;

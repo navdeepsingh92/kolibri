@@ -1,7 +1,7 @@
 <template>
 
   <div class="content-grid">
-    <ContentCard
+    <!-- <ContentCard
       v-for="content in contents"
       :key="content.id"
       class="grid-item"
@@ -16,13 +16,25 @@
       :contentId="content.content_id"
       :copiesCount="content.copies_count"
       @openCopiesModal="openCopiesModal"
-    />
+    /> -->
+    <!-- TODO need to provide a way to access the CopiesModal -->
     <CopiesModal
       v-if="modalIsOpen"
       :uniqueId="uniqueId"
       :sharedContentId="sharedContentId"
       @submit="modalIsOpen = false"
     />
+
+    <div class="topics">
+      <CardGrid :gridType="2">
+        <ChannelItemCard
+          v-for="content in contents"
+          :key="content.id"
+          :to="genContentLink(content.id, content.is_leaf)"
+          :item="content"
+        />
+      </CardGrid>
+    </div>
   </div>
 
 </template>
@@ -32,13 +44,19 @@
 
   import { validateLinkObject } from 'kolibri.utils.validators';
   import responsiveWindowMixin from 'kolibri.coreVue.mixins.responsiveWindowMixin';
-  import ContentCard from './ContentCard';
+  // import ContentCard from './ContentCard';
   import CopiesModal from './CopiesModal';
+  // import ChannelTopicCard from './cards/ChannelTopicCard.vue';
+  import ChannelItemCard from './cards/ChannelItemCard.vue';
+  import CardGrid from './cards/CardGrid.vue';
 
   export default {
     name: 'ContentCardGroupGrid',
     components: {
-      ContentCard,
+      // ChannelTopicCard,
+      ChannelItemCard,
+      CardGrid,
+      // ContentCard,
       CopiesModal,
     },
     mixins: [responsiveWindowMixin],
@@ -62,11 +80,11 @@
       uniqueId: null,
     }),
     methods: {
-      openCopiesModal(contentId) {
-        this.sharedContentId = contentId;
-        this.uniqueId = this.contents.find(content => content.content_id === contentId).id;
-        this.modalIsOpen = true;
-      },
+      // openCopiesModal(contentId) {
+      //   this.sharedContentId = contentId;
+      //   this.uniqueId = this.contents.find(content => content.content_id === contentId).id;
+      //   this.modalIsOpen = true;
+      // },
     },
   };
 

@@ -1,8 +1,8 @@
 <template>
 
   <div role="img" :class="containerClass" class="thumbnail-container">
-    <div v-if="hasThumbnail" :class="imageClass"></div>
-    <GenericThumbnail v-else :item="item" />
+    <div v-if="hasThumbnail" :class="imageClass" :style="imageStyle"></div>
+    <GenericThumbnail v-else :item="item" :small="$attrs.small" />
     <slot></slot>
   </div>
 
@@ -35,7 +35,7 @@
     },
     computed: {
       hasThumbnail() {
-        return this.item.thumbnail;
+        return Boolean(this.item.thumbnail);
       },
       containerClass() {
         return this.$computedClass({
@@ -43,9 +43,13 @@
           overflow: 'hidden',
         });
       },
+      imageStyle() {
+        return {
+          backgroundImage: `url(${this.item.thumbnail})`,
+        };
+      },
       imageClass() {
         return this.$computedClass({
-          backgroundImage: `url(${this.item.thumbnail})`,
           backgroundColor: this.$themePalette.grey.v_200,
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',

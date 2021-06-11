@@ -14,8 +14,8 @@
       >
         <div class="card-contents">
           <div class="card-row-1">
-            <Thumbnail class="thumb" :item="resource" />
-            <ActivityLabel :item="resource" />
+            <Thumbnail class="thumb" :item="resource" :small="true" />
+            <ActivityLabel :item="resource" :iconAfter="true" />
           </div>
 
           <div class="card-row-2" dir="auto">

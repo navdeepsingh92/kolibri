@@ -7,7 +7,8 @@
     <KIcon
       :icon="iconKind"
       :color="$themePalette.grey.v_500"
-      :style="{ minHeight: '50%', minWidth: '50%' }"
+      class="icon"
+      :class="{ 'icon-small': small }"
     />
   </div>
 
@@ -16,18 +17,28 @@
 
 <script>
 
+  import useLearningActivities from './useLearningActivities';
+
   export default {
     name: 'GenericThumbnail',
+    setup() {
+      const { defaultIconForResource } = useLearningActivities();
+      return { defaultIconForResource };
+    },
     props: {
       item: {
         type: Object,
         required: true,
       },
+      small: {
+        type: Boolean,
+        default: false,
+      },
     },
     computed: {
       iconKind() {
         if (this.item.is_leaf) {
-          return this.item.kind;
+          return this.defaultIconForResource(this.item);
         } else {
           return 'topic';
         }
@@ -44,6 +55,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .icon {
+    min-width: 56px;
+    min-height: 56px;
+    opacity: 0.5;
+  }
+
+  .icon-small {
+    min-width: 24px;
+    min-height: small;
   }
 
 </style>
