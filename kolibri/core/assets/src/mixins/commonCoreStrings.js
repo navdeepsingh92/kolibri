@@ -86,6 +86,16 @@ export const coreStrings = createTranslator('CommonCoreStrings', {
   usersLabel: 'Users',
   viewMoreAction: 'View more',
 
+  // Learning activities
+  createActivity: 'Create',
+  listenActivity: 'Listen',
+  reflectActivity: 'Reflect',
+  practiceActivity: 'Practice',
+  readActivity: 'Read',
+  watchActivity: 'Watch',
+  exploreActivity: 'Explore',
+  topicLabel: 'Topic',
+
   // Notifications
   changesSavedNotification: 'Changes saved',
   changesNotSavedNotification: 'Changes not saved',

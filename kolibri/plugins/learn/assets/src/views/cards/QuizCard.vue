@@ -9,7 +9,9 @@
 
 <script>
 
+  import { computed } from 'kolibri.lib.vueCompositionApi';
   import { ClassesPageNames } from '../../constants';
+  import useClassAssignments from '../homepage/useClassAssignments';
   import AssignmentCard from './AssignmentCard.vue';
 
   export default {
@@ -17,22 +19,19 @@
     components: {
       AssignmentCard,
     },
+    setup(props) {
+      const { getClassroomName } = useClassAssignments();
+      return {
+        assignmentName: computed(() => props.quiz.title || ''),
+        classroomName: computed(() => getClassroomName(props.quiz.collection)),
+        progress: computed(() => props.quiz.progress || {}),
+      };
+    },
     props: {
-      classroom: {
-        type: Object,
-        required: true,
-      },
       quiz: {
         type: Object,
         required: true,
       },
-    },
-    data() {
-      return {
-        progress: this.quiz.progress || {},
-        classroomName: this.classroom.name || '',
-        assignmentName: this.quiz.title || '',
-      };
     },
     computed: {
       inProgressLabel() {
@@ -63,6 +62,7 @@
           return {
             name: ClassesPageNames.EXAM_REPORT_VIEWER,
             params: {
+              classId: this.quiz.collection,
               examId: this.quiz.id,
               questionNumber: 0,
               questionInteraction: 0,
@@ -72,6 +72,7 @@
           return {
             name: ClassesPageNames.EXAM_VIEWER,
             params: {
+              classId: this.quiz.collection,
               examId: this.quiz.id,
               questionNumber: 0,
             },

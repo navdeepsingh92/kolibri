@@ -47,7 +47,7 @@
     border-radius: 8px;
     transition: box-shadow $core-time ease;
     &:hover {
-      @extend %dropshadow-8dp;
+      @extend %dropshadow-4dp;
     }
   }
 

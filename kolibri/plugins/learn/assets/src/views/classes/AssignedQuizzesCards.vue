@@ -1,8 +1,8 @@
 <template>
 
-  <div>
+  <section>
     <h2>
-      <KLabeledIcon icon="quiz" :label="$tr('yourQuizzesHeader')" />
+      <KLabeledIcon icon="quiz" :label="header" />
     </h2>
 
     <CardGrid v-if="visibleItems.length > 0" :gridType="1">
@@ -10,14 +10,13 @@
         v-for="quiz in visibleItems"
         :key="quiz.id"
         :quiz="quiz"
-        :classroom="currentClassroom"
       />
     </CardGrid>
     <p v-else>
       {{ $tr('noQuizzesMessage') }}
     </p>
 
-  </div>
+  </section>
 
 </template>
 
@@ -38,13 +37,15 @@
         type: Array,
         required: true,
       },
+      // If true, this will filter and sort items, plus show a "Recent lessons" header
+      recent: {
+        type: Boolean,
+        default: false,
+      },
     },
     computed: {
-      currentClassroom() {
-        return this.$store.state.classAssignments.currentClassroom;
-      },
       visibleItems() {
-        return this.items.filter(quiz => {
+        let visible = this.items.filter(quiz => {
           if (!quiz.active) {
             return false;
           } else if (quiz.archive) {
@@ -54,10 +55,19 @@
             return true;
           }
         });
+        if (this.recent) {
+          return visible.slice(0, 3);
+        } else {
+          return visible;
+        }
+      },
+      header() {
+        return this.recent ? this.$tr('recentQuizzesHeader') : this.$tr('yourQuizzesHeader');
       },
     },
     $trs: {
       yourQuizzesHeader: 'Your quizzes',
+      recentQuizzesHeader: 'Recent quizzes',
       noQuizzesMessage: 'You have no quizzes assigned',
     },
   };

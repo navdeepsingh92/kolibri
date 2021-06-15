@@ -9,8 +9,10 @@
 
 <script>
 
+  import { computed } from 'kolibri.lib.vueCompositionApi';
   import commonCoreStrings from 'kolibri.coreVue.mixins.commonCoreStrings';
   import { ClassesPageNames } from '../../constants';
+  import useClassAssignments from '../homepage/useClassAssignments';
   import AssignmentCard from './AssignmentCard.vue';
 
   export default {
@@ -19,22 +21,19 @@
       AssignmentCard,
     },
     mixins: [commonCoreStrings],
+    setup(props) {
+      const { getClassroomName } = useClassAssignments();
+      return {
+        assignmentName: computed(() => props.lesson.title || ''),
+        classroomName: computed(() => getClassroomName(props.lesson.collection)),
+        progress: computed(() => props.lesson.progress || {}),
+      };
+    },
     props: {
-      classroom: {
-        type: Object,
-        required: true,
-      },
       lesson: {
         type: Object,
         required: true,
       },
-    },
-    data() {
-      return {
-        progress: this.lesson.progress || {},
-        classroomName: this.classroom.name || '',
-        assignmentName: this.lesson.title || '',
-      };
     },
     computed: {
       lessonProgress() {
@@ -55,6 +54,7 @@
         return {
           name: ClassesPageNames.LESSON_PLAYLIST,
           params: {
+            classId: this.lesson.collection,
             lessonId: this.lesson.id,
           },
         };

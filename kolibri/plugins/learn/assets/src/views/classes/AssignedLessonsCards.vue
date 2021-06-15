@@ -1,23 +1,22 @@
 <template>
 
-  <div>
-    <h2>
-      <KLabeledIcon icon="lesson" :label="$tr('yourLessonsHeader')" />
+  <section>
+    <h2 style="display: inline-block">
+      <KLabeledIcon icon="lesson" :label="header" />
     </h2>
 
     <CardGrid v-if="items.length > 0" :gridType="1">
       <LessonCard
-        v-for="lesson in items"
+        v-for="lesson in visibleItems"
         :key="lesson.id"
         :lesson="lesson"
-        :classroom="currentClassroom"
       />
     </CardGrid>
 
     <p v-else>
       {{ $tr('noLessonsMessage') }}
     </p>
-  </div>
+  </section>
 
 </template>
 
@@ -38,14 +37,27 @@
         type: Array,
         required: true,
       },
+      // If true, this will filter and sort items, plus show a "Recent lessons" header
+      recent: {
+        type: Boolean,
+        default: false,
+      },
     },
     computed: {
-      currentClassroom() {
-        return this.$store.state.classAssignments.currentClassroom;
+      visibleItems() {
+        if (this.recent) {
+          return this.items.slice(0, 3);
+        } else {
+          return this.items;
+        }
+      },
+      header() {
+        return this.recent ? this.$tr('recentLessonsHeader') : this.$tr('yourLessonsHeader');
       },
     },
     $trs: {
       yourLessonsHeader: 'Your lessons',
+      recentLessonsHeader: 'Recent lessons',
       noLessonsMessage: 'You have no lessons assigned',
     },
   };

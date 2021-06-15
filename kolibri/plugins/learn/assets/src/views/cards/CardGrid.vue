@@ -1,6 +1,6 @@
 <template>
 
-  <div class="cards-grid" :class="[gridClass, levelClass]">
+  <div class="cards-grid" :class="[gridClass, levelClass]" role="grid">
     <slot></slot>
   </div>
 

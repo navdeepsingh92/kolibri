@@ -4,7 +4,7 @@
     <NavbarLink
       name="homepage-link"
       :title="coreString('homeLabel')"
-      :link="allClassesLink"
+      :link="{ name: 'HOME' }"
     >
       <KIcon
         icon="dashboard"

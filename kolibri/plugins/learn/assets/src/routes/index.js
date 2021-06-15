@@ -16,6 +16,7 @@ import { showChannels } from '../modules/topicsRoot/handlers';
 import { PageNames, ClassesPageNames } from '../constants';
 import RecommendedPage from '../views/RecommendedPage';
 import RecommendedSubpage from '../views/RecommendedSubpage';
+import HomePage from '../views/homepage/HomePage.vue';
 import classesRoutes from './classesRoutes';
 
 function unassignedContentGuard() {
@@ -41,9 +42,18 @@ export default [
       return router.replace({
         name:
           memberships.length > 0 || !canAccessUnassignedContent
-            ? ClassesPageNames.ALL_CLASSES
+            ? PageNames.HOME
             : PageNames.TOPICS_ROOT,
       });
+    },
+  },
+  {
+    name: PageNames.HOME,
+    path: '/home',
+    component: HomePage,
+    handler() {
+      store.commit('SET_PAGE_NAME', PageNames.HOME);
+      store.commit('CORE_SET_PAGE_LOADING', false);
     },
   },
   {
