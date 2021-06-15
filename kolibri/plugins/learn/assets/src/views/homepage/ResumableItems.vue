@@ -14,7 +14,7 @@
       >
         <div class="card-contents">
           <div class="card-row-1">
-            <Thumbnail class="thumb" :item="resource" :small="true" />
+            <Thumbnail :item="resource" :small="true" />
             <ActivityLabel :item="resource" :iconAfter="true" />
           </div>
 
@@ -104,11 +104,6 @@
 
 
 <style lang="scss" scoped>
-
-  .thumb {
-    width: 105px;
-    height: 60px;
-  }
 
   .card-row-1 {
     display: flex;

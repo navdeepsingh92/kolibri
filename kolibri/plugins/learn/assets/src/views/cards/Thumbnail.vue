@@ -1,9 +1,22 @@
 <template>
 
-  <div role="img" :class="containerClass" class="thumbnail-container">
-    <div v-if="hasThumbnail" :class="imageClass" :style="imageStyle"></div>
-    <GenericThumbnail v-else :item="item" :small="$attrs.small" />
+  <div role="img" :class="containerClass">
+    <div
+      v-if="hasThumbnail"
+      class="inside-thumbnail-container"
+      :class="imageClass"
+      :style="imageStyle"
+    ></div>
+    <GenericThumbnail
+      v-else
+      class="inside-thumbnail-container"
+      :item="item"
+      :small="$attrs.small"
+    />
     <slot></slot>
+    <span v-if="cornerLabel" class="corner-label">
+      {{ cornerLabel }}
+    </span>
   </div>
 
 </template>
@@ -32,12 +45,22 @@
         type: Object,
         required: true,
       },
+      // Used to display the duration of the activity (e.g. "short activity", "5 minutes")
+      cornerLabel: {
+        type: String,
+        required: false,
+        default: null,
+      },
     },
     computed: {
       hasThumbnail() {
         return Boolean(this.item.thumbnail);
       },
       containerClass() {
+        const sizeClass = this.$attrs.small ? 'thumbnail-container-small' : 'thumbnail-container';
+        return [sizeClass, this.containerComputedClass];
+      },
+      containerComputedClass() {
         return this.$computedClass({
           borderRadius: this.rounded && '4px',
           overflow: 'hidden',
@@ -65,10 +88,50 @@
 <style lang="scss" scoped>
 
   .thumbnail-container {
-    > * {
+    position: relative;
+    // aspect ratio hack
+    height: 0;
+    padding-top: 56.25%;
+
+    .inside-thumbnail-container {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
     }
+
+    .corner-label {
+      bottom: 8px;
+      left: 8px;
+      padding: 8px;
+      font-size: 12px;
+    }
+  }
+
+  .thumbnail-container-small {
+    position: relative;
+    width: 150px;
+    height: 80px;
+
+    .inside-thumbnail-container {
+      width: 100%;
+      height: 100%;
+    }
+
+    .corner-label {
+      bottom: 6px;
+      left: 6px;
+      padding: 4px;
+      font-size: 10px;
+    }
+  }
+
+  .corner-label {
+    position: absolute;
+    color: white;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 4px;
   }
 
 </style>

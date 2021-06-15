@@ -87,7 +87,6 @@
   }
 
   .thumb {
-    height: 160px;
     margin: 0 -16px;
   }
 
