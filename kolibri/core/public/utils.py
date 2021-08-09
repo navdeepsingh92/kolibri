@@ -17,7 +17,7 @@ from kolibri.core.device.utils import DeviceNotProvisioned
 from kolibri.core.device.utils import get_device_setting
 from kolibri.core.public.constants.user_sync_statuses import QUEUED
 from kolibri.core.public.constants.user_sync_statuses import SYNC
-from kolibri.core.tasks.api import prepare_peer_sync_job
+from kolibri.core.tasks.api import prepare_soud_sync_job
 from kolibri.core.tasks.api import prepare_sync_task
 from kolibri.core.tasks.job import Job
 from kolibri.core.tasks.main import queue
@@ -27,8 +27,37 @@ from kolibri.core.tasks.main import scheduler
 logger = logging.getLogger(__name__)
 
 
-def get_device_info():
-    """Returns metadata information about the device"""
+device_info_keys = {
+    "1": [
+        "application",
+        "kolibri_version",
+        "instance_id",
+        "device_name",
+        "operating_system",
+    ],
+    "2": [
+        "application",
+        "kolibri_version",
+        "instance_id",
+        "device_name",
+        "operating_system",
+        "subset_of_users_device",
+    ],
+}
+
+DEVICE_INFO_VERSION = "2"
+
+
+def get_device_info(version=DEVICE_INFO_VERSION):
+    """
+    Returns metadata information about the device
+    The default kwarg version should always be the latest
+    version of device info that this function supports.
+    We maintain historic versions for backwards compatibility
+    """
+
+    if version not in device_info_keys:
+        version = DEVICE_INFO_VERSION
 
     instance_model = InstanceIDModel.get_or_create_current_instance()[0]
     try:
@@ -39,7 +68,7 @@ def get_device_info():
         device_name = instance_model.hostname
         subset_of_users_device = False
 
-    info = {
+    all_info = {
         "application": "kolibri",
         "kolibri_version": kolibri.__version__,
         "instance_id": instance_model.id,
@@ -47,12 +76,19 @@ def get_device_info():
         "operating_system": platform.system(),
         "subset_of_users_device": subset_of_users_device,
     }
+
+    info = {}
+
+    # By this point, we have validated that the version is in device_info_keys
+    for key in device_info_keys.get(version, []):
+        info[key] = all_info[key]
+
     return info
 
 
-def startpeerfacilitysync(server, user_id):
+def startpeerusersync(server, user_id):
     """
-    Initiate a SYNC (PULL + PUSH) of a specific facility from another device.
+    Initiate a SYNC (PULL + PUSH) of a specific user from another device.
     """
 
     user = FacilityUser.objects.get(pk=user_id)
@@ -68,11 +104,11 @@ def startpeerfacilitysync(server, user_id):
         device_info["device_name"],
         device_info["instance_id"],
         server,
-        type="SYNCPEER/FULL",
+        type="SYNCPEER/SINGLE",
     )
 
-    job_data = prepare_peer_sync_job(
-        server, facility_id, user.username, user.password, extra_metadata=extra_metadata
+    job_data = prepare_soud_sync_job(
+        server, facility_id, user_id, extra_metadata=extra_metadata
     )
 
     job_id = queue.enqueue(call_command, "sync", **job_data)
@@ -90,6 +126,7 @@ def begin_request_soud_sync(server, user):
         # this does not make sense unless this is a SoUD
         logger.warn("Only Subsets of Users Devices can do this")
         return
+    logger.info("Queuing SoUD syncing request")
     queue.enqueue(request_soud_sync, server, user)
 
 
@@ -150,7 +187,7 @@ def request_soud_sync(server, user=None, queue_id=None, ttl=10):
         UserSyncStatus.objects.update_or_create(user_id=user, defaults={"queued": True})
 
         if server_response["action"] == SYNC:
-            job_id = startpeerfacilitysync(server, user)
+            job_id = startpeerusersync(server, user)
             logger.info(
                 "Enqueuing a sync task for user {} in job {}".format(user, job_id)
             )

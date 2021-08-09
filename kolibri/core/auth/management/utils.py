@@ -15,12 +15,14 @@ from morango.models import Certificate
 from morango.models import ScopeDefinition
 from six.moves.urllib.parse import urljoin
 
+from kolibri.core.auth.backends import FACILITY_CREDENTIAL_KEY
 from kolibri.core.auth.constants.morango_sync import ScopeDefinitions
 from kolibri.core.auth.models import Facility
 from kolibri.core.auth.models import FacilityUser
 from kolibri.core.device.models import DevicePermissions
 from kolibri.core.device.utils import device_provisioned
 from kolibri.core.device.utils import provision_device
+from kolibri.core.device.utils import set_device_settings
 from kolibri.core.discovery.utils.network.client import NetworkClient
 from kolibri.core.discovery.utils.network.errors import NetworkLocationNotFound
 from kolibri.core.discovery.utils.network.errors import URLParseError
@@ -160,7 +162,13 @@ def get_baseurl(baseurl):
 
 
 def get_client_and_server_certs(
-    username, password, dataset_id, nc, user_id=None, noninteractive=False
+    username,
+    password,
+    dataset_id,
+    nc,
+    user_id=None,
+    facility_id=None,
+    noninteractive=False,
 ):
 
     # get any full-facility certificates we have for the facility
@@ -226,11 +234,18 @@ def get_client_and_server_certs(
                 username = input("Please enter username: ")
                 password = getpass.getpass("Please enter password: ")
 
+        userargs = username
+        if user_id:
+            # add facility so `FacilityUserBackend` can validate
+            userargs = {
+                FacilityUser.USERNAME_FIELD: username,
+                FACILITY_CREDENTIAL_KEY: facility_id,
+            }
         client_cert = nc.certificate_signing_request(
             server_cert,
             client_scope,
             csr_scope_params,
-            userargs=username,
+            userargs=userargs,
             password=password,
         )
     else:
@@ -290,6 +305,7 @@ def provision_single_user_device(user_id):
     # if device has not been provisioned, set it up
     if not device_provisioned():
         provision_device(default_facility=user.facility)
+        set_device_settings(subset_of_users_device=True)
 
     DevicePermissions.objects.get_or_create(
         user=user, defaults={"is_superuser": False, "can_manage_content": True}

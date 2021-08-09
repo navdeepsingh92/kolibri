@@ -4,13 +4,17 @@ from uuid import uuid4
 
 from django.conf import settings
 from django.db import models
+from django.db.models import QuerySet
 from morango.models import UUIDField
 from morango.models.core import SyncSession
 
 from .utils import LANDING_PAGE_LEARN
 from .utils import LANDING_PAGE_SIGN_IN
+from kolibri.core.auth.constants import role_kinds
 from kolibri.core.auth.models import Facility
 from kolibri.core.auth.models import FacilityUser
+from kolibri.core.auth.permissions.base import RoleBasedPermissions
+from kolibri.core.auth.permissions.general import IsOwn
 from kolibri.core.utils.cache import process_cache as cache
 from kolibri.plugins.app.utils import interface
 
@@ -37,7 +41,13 @@ class DevicePermissions(models.Model):
 DEVICE_SETTINGS_CACHE_KEY = "device_settings_cache_key"
 
 
-class DeviceSettingsManager(models.Manager):
+class DeviceSettingsQuerySet(QuerySet):
+    def delete(self, **kwargs):
+        cache.delete(DEVICE_SETTINGS_CACHE_KEY)
+        return super(DeviceSettingsQuerySet, self).delete(**kwargs)
+
+
+class DeviceSettingsManager(models.Manager.from_queryset(DeviceSettingsQuerySet)):
     def get(self, **kwargs):
         if DEVICE_SETTINGS_CACHE_KEY not in cache:
             model = super(DeviceSettingsManager, self).get(**kwargs)
@@ -102,8 +112,14 @@ class DeviceSettings(models.Model):
     def save(self, *args, **kwargs):
         self.pk = 1
         self.full_clean()
-        super(DeviceSettings, self).save(*args, **kwargs)
+        out = super(DeviceSettings, self).save(*args, **kwargs)
         cache.set(DEVICE_SETTINGS_CACHE_KEY, self, 600)
+        return out
+
+    def delete(self, *args, **kwargs):
+        out = super(DeviceSettings, self).delete(*args, **kwargs)
+        cache.delete(DEVICE_SETTINGS_CACHE_KEY)
+        return out
 
 
 CONTENT_CACHE_KEY_CACHE_KEY = "content_cache_key"
@@ -216,3 +232,17 @@ class UserSyncStatus(models.Model):
         SyncSession, on_delete=models.SET_NULL, null=True, blank=True
     )
     queued = models.BooleanField(default=False)
+
+    # users can read their own SyncStatus
+    own = IsOwn(read_only=True)
+    # SyncStatus can be read by admins, and coaches, for the member user
+    role = RoleBasedPermissions(
+        target_field="user",
+        can_be_created_by=(),
+        can_be_read_by=(role_kinds.ADMIN, role_kinds.COACH),
+        can_be_updated_by=(),
+        can_be_deleted_by=(),
+        collection_field="user__memberships__collection",
+        is_syncable=False,
+    )
+    permissions = own | role
